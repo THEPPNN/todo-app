@@ -63,6 +63,7 @@ export default function TodoTable() {
             accessorKey: "createdAt",
             header: "DUE DATE",
             cell: ({ getValue }) => {
+                if (!getValue()) return ""
                 const date = new Date(getValue() as string)
                 return date.toLocaleDateString("en-GB", {
                     day: "numeric",

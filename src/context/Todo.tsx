@@ -18,6 +18,7 @@ interface TodoContextType {
     search: string
     setSearch: (s: string) => void
     toggleTodoStatus: (id: number, status: string) => void
+    showToast: (message: string, color: string) => void
 }
 
 const TodoContext = createContext<TodoContextType>(null)
@@ -147,7 +148,8 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
             updatingTodo,
             setUpdatingTodo,
             upcomingTodos,
-            toggleTodoStatus
+            toggleTodoStatus,
+            showToast
         }}>
             {children}
             {toast && <ToastMessage message={toast.message} color={toast.color} />}

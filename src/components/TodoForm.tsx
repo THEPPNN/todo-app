@@ -2,13 +2,13 @@ import { useEffect, useState } from "react"
 import { useTodo } from "../context/Todo"
 
 export default function TodoForm() {
-    const { addTodo, updateTodo, loading, updatingTodo, setUpdatingTodo } = useTodo()
+    const { addTodo, updateTodo, loading, updatingTodo, setUpdatingTodo, showToast } = useTodo()
     const [title, setTitle] = useState("")
     const [note, setNote] = useState("")
     const [createdAt, setCreatedAt] = useState("")
-    
+
     useEffect(() => {
-        if(updatingTodo) {
+        if (updatingTodo) {
             setTitle(updatingTodo.title)
             setNote(updatingTodo.note)
             setCreatedAt(updatingTodo.createdAt)
@@ -17,12 +17,12 @@ export default function TodoForm() {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if(!title) {
-            alert("Title is required")
+        if (!title) {
+            showToast("Title is required", "red")
             return
         }
-        if(updatingTodo) {
-            updateTodo(updatingTodo.id, { title, note, createdAt})
+        if (updatingTodo) {
+            updateTodo(updatingTodo.id, { title, note, createdAt })
         } else {
             addTodo({ title, note, createdAt })
         }
