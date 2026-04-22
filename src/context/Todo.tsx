@@ -1,5 +1,6 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useEffect, useState } from "react"
 import type { Todo } from "../types/todo"
+import { mockTodos } from "../assets/mock/todos.mock"
 
 interface TodoContextType {
     todos: Todo[]
@@ -24,7 +25,7 @@ export const useTodo = () => {
 export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
     const [todos, setTodos] = useState<Todo[]>([])
     const [loading, setLoading] = useState(false)
-    const [updatingTodo, setUpdatingTodo] = useState<Todo | null>(null)
+    const [updatingTodo, setUpdatingTodo] = useState<Todo[]>()
 
     const addTodo = (todo: Todo) => {
         setTodos([...todos, todo])
@@ -36,7 +37,19 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
         setTodos(todos.filter(t => t.id !== id))
     }
 
-    return <TodoContext.Provider value={{ 
+    const getUpcomingTodos = async () => {
+        try {
+            const res = mockTodos
+            setUpdatingTodo(res)
+        } catch (err) {
+            console.error("getUpcomingTodos failed:", err)
+        }
+    }
+    useEffect(() => {
+        getUpcomingTodos()
+    }, [])
+
+    return <TodoContext.Provider value={{
         todos,
         addTodo,
         updateTodo,
