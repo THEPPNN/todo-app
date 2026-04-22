@@ -28,12 +28,15 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
     const [updatingTodo, setUpdatingTodo] = useState<Todo[]>()
 
     const addTodo = (todo: Todo) => {
+        console.log('addTodo',todo);
         setTodos([...todos, todo])
     }
     const updateTodo = (id: number, todo: Todo) => {
-        setTodos(todos.map(t => t.id === id ? todo : t))
+     console.log('updateTodo',id, todo);
+     setTodos(todos.map(t => t.id === id ? todo : t))
     }
     const deleteTodo = (id: number) => {
+     console.log('deleteTodo',id);
         setTodos(todos.filter(t => t.id !== id))
     }
 

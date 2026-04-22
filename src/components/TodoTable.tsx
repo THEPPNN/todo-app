@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-table"
 import { useTodos } from "../hook/useTodos"
 import type { Todo } from "../types/todo"
+import { useTodo } from "../context/Todo"
 
 export default function TodoTable() {
     const [page, setPage] = useState(1)
@@ -17,6 +18,16 @@ export default function TodoTable() {
     const [search, setSearch] = useState("")
 
     const { data, isLoading, error, isPlaceholderData } = useTodos(page, limit, search)
+    const { deleteTodo, setUpdatingTodo } = useTodo()
+    const formatDateForInput = (dateStr: string) => {
+        const date = new Date(dateStr)
+
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, "0")
+        const day = String(date.getDate()).padStart(2, "0")
+
+        return `${year}-${month}-${day}`
+    }
 
     const columns: ColumnDef<Todo>[] = [
         {
@@ -63,11 +74,11 @@ export default function TodoTable() {
                     done: "bg-green-100 text-green-700",
                 }
                 return (
-                   <select className={`text-xs px-2 py-1 rounded-full font-medium ${styles[status]}`}>
-                    <option value="pending">Pending</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="done">Done</option>
-                   </select>
+                    <select className={`text-xs px-2 py-1 rounded-full font-medium ${styles[status]}`}>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
                 )
             },
         },
@@ -76,11 +87,12 @@ export default function TodoTable() {
             header: "ACTIONS",
             cell: ({ row }) => (
                 <div className="flex gap-2">
-                    <button className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm">
-                    <i className="fa-solid fa-pen-to-square"></i>
+                    <button onClick={() => setUpdatingTodo({ ...row.original, createdAt: formatDateForInput(row.original.createdAt) })}
+                        className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm">
+                        <i className="fa-solid fa-pen-to-square"></i>
                     </button>
-                    <button className="bg-red-500 text-white px-3 py-1.5 rounded text-sm">
-                    <i className="fa-solid fa-delete-left"></i>
+                    <button onClick={() => setConfirmId(row.original.id)} className="bg-red-500 text-white px-3 py-1.5 rounded text-sm">
+                        <i className="fa-solid fa-delete-left"></i>
                     </button>
                 </div>
             ),
@@ -98,6 +110,7 @@ export default function TodoTable() {
     })
 
     const totalPages = Math.ceil((data?.total ?? 0) / limit)
+    const [confirmId, setConfirmId] = useState<number | null>(null)
 
     return (
         <div className="p-4 sm:p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
@@ -217,6 +230,20 @@ export default function TodoTable() {
                     </button>
                 </div>
             </div>
+
+            {
+                confirmId && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg text-center">
+                            <p className="text-lg font-bold mb-4">Are you sure you want to delete this item?</p>
+                            <div className="flex gap-2 justify-center">
+                                <button onClick={() => { deleteTodo(confirmId); setConfirmId(null) }} className="bg-red-500 text-white px-4 py-2 rounded-md">ยืนยัน</button>
+                                <button onClick={() => setConfirmId(null)} className="bg-gray-500 text-white px-4 py-2 rounded-md">ยกเลิก</button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
         </div>
     )
 }

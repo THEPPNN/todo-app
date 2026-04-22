@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query"
-import { mockTodos } from "../assets/mock/todos.mock.ts"
 import type { Todo } from "../types/todo.ts";
 
 type TodosResponse = {
@@ -39,11 +38,4 @@ export function useTodos(page: number, limit: number, search: string) {
         placeholderData: (prev) => prev,          // ตอนเปลี่ยนหน้า ใช้ data เก่าก่อน (ไม่กระพริบ)
     })
 }
-
-export function useUpcomingTodos() {
-    return useQuery({
-        queryKey: ["todos", "upcoming"],
-        queryFn: () => Promise.resolve(mockTodos),
-        staleTime: Infinity
-    })
-}
+ 
