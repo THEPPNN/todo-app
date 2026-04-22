@@ -1,6 +1,8 @@
 import { TodoProvider } from './context/Todo'
 import TodoForm from './components/TodoForm'
 import TodoCalendar from './components/TodoCalendar'
+import TodoTable from './components/TodoTable'
+
 function App() {
   return (
     <div className="container mx-auto p-4">
@@ -16,7 +18,7 @@ function App() {
             <TodoCalendar />
           </div >
           <div className="md:col-span-2">
-            <p>รายการทั้งหมด</p>
+            <TodoTable />  
           </div >
         </div >
       </TodoProvider>

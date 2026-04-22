@@ -1,0 +1,222 @@
+import { useState } from "react"
+import {
+    useReactTable,
+    getCoreRowModel,
+    getSortedRowModel,
+    flexRender,
+    type ColumnDef,
+    type SortingState,
+} from "@tanstack/react-table"
+import { useTodos } from "../hook/useTodos"
+import type { Todo } from "../types/todo"
+
+export default function TodoTable() {
+    const [page, setPage] = useState(1)
+    const [limit] = useState(10)
+    const [sorting, setSorting] = useState<SortingState>([])
+    const [search, setSearch] = useState("")
+
+    const { data, isLoading, error, isPlaceholderData } = useTodos(page, limit, search)
+
+    const columns: ColumnDef<Todo>[] = [
+        {
+            accessorKey: "id",
+            header: "NO",
+            cell: ({ row }) => <span className="text-gray-500">{(page - 1) * limit + row.index + 1}</span>
+        },
+        {
+            accessorKey: "title",
+            header: "TITLE",
+            cell: ({ getValue }) => (
+                <span className="font-medium">{getValue() as string}</span>
+            ),
+        },
+        {
+            accessorKey: "note",
+            header: "DESCRIPTION",
+            cell: ({ getValue }) => (
+                <span className="text-gray-600 truncate max-w-xs block">
+                    {getValue() as string}
+                </span>
+            ),
+        },
+        {
+            accessorKey: "createdAt",
+            header: "DUE DATE",
+            cell: ({ getValue }) => {
+                const date = new Date(getValue() as string)
+                return date.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                })
+            },
+        },
+        {
+            accessorKey: "status",
+            header: "STATUS",
+            cell: ({ getValue }) => {
+                const status = getValue() as Todo["status"]
+                const styles = {
+                    pending: "bg-yellow-100 text-yellow-700",
+                    "in-progress": "bg-blue-100 text-blue-700",
+                    done: "bg-green-100 text-green-700",
+                }
+                return (
+                   <select className={`text-xs px-2 py-1 rounded-full font-medium ${styles[status]}`}>
+                    <option value="pending">Pending</option>
+                    <option value="in-progress">In Progress</option>
+                    <option value="done">Done</option>
+                   </select>
+                )
+            },
+        },
+        {
+            id: "actions",
+            header: "ACTIONS",
+            cell: ({ row }) => (
+                <div className="flex gap-2">
+                    <button className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm">
+                    <i className="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button className="bg-red-500 text-white px-3 py-1.5 rounded text-sm">
+                    <i className="fa-solid fa-delete-left"></i>
+                    </button>
+                </div>
+            ),
+        },
+    ]
+
+    const table = useReactTable({
+        data: data?.todos ?? [],
+        columns,
+        state: { sorting },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        manualPagination: true, // pagination จัดการเองผ่าน TanStack Query
+    })
+
+    const totalPages = Math.ceil((data?.total ?? 0) / limit)
+
+    return (
+        <div className="p-4 sm:p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <h2 className="text-lg font-semibold">Todo List</h2>
+                <input
+                    type="search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="🔍 ค้นหา..."
+                    className="px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 w-full sm:w-64"
+                />
+            </div>
+
+            <div className="overflow-x-auto relative">
+                <table className="w-full">
+                    <thead>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id} className="bg-gray-50 border-b">
+                                {headerGroup.headers.map((header) => (
+                                    <th
+                                        key={header.id}
+                                        onClick={header.column.getToggleSortingHandler()}
+                                        className="p-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100"
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            {flexRender(header.column.columnDef.header, header.getContext())}
+                                            {{
+                                                asc: " ↑",
+                                                desc: " ↓",
+                                            }[header.column.getIsSorted() as string] ?? null}
+                                        </div>
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+                    <tbody>
+                        {isLoading ? (
+                            Array.from({ length: 5 }).map((_, i) => (
+                                <tr key={i} className="border-b animate-pulse">
+                                    {columns.map((_, j) => (
+                                        <td key={j} className="p-3">
+                                            <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        ) : error ? (
+                            <tr>
+                                <td colSpan={columns.length} className="p-8 text-center text-red-500">
+                                    เกิดข้อผิดพลาด: {(error as Error).message}
+                                </td>
+                            </tr>
+                        ) : table.getRowModel().rows.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length} className="p-8 text-center text-gray-500">
+                                    ไม่พบข้อมูล
+                                </td>
+                            </tr>
+                        ) : (
+                            table.getRowModel().rows.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    className="border-b odd:bg-white even:bg-gray-50 hover:bg-blue-50/40 transition"
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td key={cell.id} className="p-3 text-sm">
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+
+                {isPlaceholderData && (
+                    <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
+                <span className="text-sm text-gray-600">
+                    หน้า {page} / {totalPages} (ทั้งหมด {data?.total ?? 0} รายการ)
+                </span>
+                <div className="flex gap-1">
+                    <button
+                        onClick={() => setPage(1)}
+                        disabled={page === 1}
+                        className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        «
+                    </button>
+                    <button
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        ‹
+                    </button>
+                    <button
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        ›
+                    </button>
+                    <button
+                        onClick={() => setPage(totalPages)}
+                        disabled={page >= totalPages}
+                        className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        »
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}

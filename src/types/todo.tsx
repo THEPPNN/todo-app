@@ -3,6 +3,6 @@ export interface Todo {
     title: string
     note: string
     createdAt: string
-    status: string
+    status: "pending" | "in-progress" | "done"
     completed: boolean
   }

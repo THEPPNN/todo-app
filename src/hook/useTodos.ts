@@ -6,11 +6,11 @@ type TodosResponse = {
     todos: Todo[]
     total: number
 }
-async function fetchTodos(page: number, limit: number): Promise<TodosResponse> {
+async function fetchTodos(page: number, limit: number, search: string): Promise<TodosResponse> {
     const skip = (page - 1) * limit
-    const res = await fetch(
-        `https://dummyjson.com/products?limit=${limit}&skip=${skip}&select=brand,title,meta`
-    )
+    const url = search ? `https://dummyjson.com/products/search?q=${search}&limit=${limit}&skip=${skip}&select=brand,title,meta`
+        : `https://dummyjson.com/products?limit=${limit}&skip=${skip}&select=brand,title,meta`
+    const res = await fetch(url)
     if (!res.ok) throw new Error("Failed to fetch todos")
 
     const data = await res.json()
@@ -31,10 +31,10 @@ async function fetchTodos(page: number, limit: number): Promise<TodosResponse> {
     return { todos: mappedData, total: data.total }
 }
 
-export function useTodos(page: number, limit: number) {
+export function useTodos(page: number, limit: number, search: string) {
     return useQuery({
-        queryKey: ["todos", page, limit],        // cache แยกตาม page+limit
-        queryFn: () => fetchTodos(page, limit),
+        queryKey: ["todos", page, limit, search],        // cache แยกตาม page+limit
+        queryFn: () => fetchTodos(page, limit, search),
         staleTime: 30_000,                       // cache 30 วิ
         placeholderData: (prev) => prev,          // ตอนเปลี่ยนหน้า ใช้ data เก่าก่อน (ไม่กระพริบ)
     })
