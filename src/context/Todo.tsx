@@ -38,24 +38,36 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const getUpcomingTodos = async () => {
+        setLoading(true)
         try {
-            const res = mockTodos
-            setUpdatingTodo(res)
-        } catch (err) {
-            console.error("getUpcomingTodos failed:", err)
+            const data: Todo[] = mockTodos.map((item) => ({
+                id: item.id,
+                title: item.title,
+                note: item.note,
+                createdAt: item.createdAt.split("T")[0],
+                status: item.status,
+                completed: false,
+            }))
+            setTodos(data)
+        } finally {
+            setLoading(false)
         }
     }
     useEffect(() => {
         getUpcomingTodos()
     }, [])
 
-    return <TodoContext.Provider value={{
-        todos,
-        addTodo,
-        updateTodo,
-        deleteTodo,
-        loading,
-        updatingTodo,
-        setUpdatingTodo,
-    }}>{children}</TodoContext.Provider>
+    return (
+        <TodoContext.Provider value={{
+            todos,
+            addTodo,
+            updateTodo,
+            deleteTodo,
+            loading,
+            updatingTodo,
+            setUpdatingTodo,
+        }}>
+            {children}
+        </TodoContext.Provider>
+    )
 }
