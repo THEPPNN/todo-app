@@ -98,11 +98,11 @@ export default function TodoTable() {
             header: "ACTIONS",
             cell: ({ row }) => (
                 <div className="flex gap-2">
-                    <button onClick={() => setUpdatingTodo({ ...row.original, createdAt: formatDateForInput(row.original.createdAt) })}
+                    <button type="button" onClick={() => setUpdatingTodo({ ...row.original, createdAt: formatDateForInput(row.original.createdAt) })}
                         className="bg-yellow-500 text-white px-3 py-1.5 rounded text-sm">
                         <i className="fa-solid fa-pen-to-square"></i>
                     </button>
-                    <button onClick={() => setConfirmId(row.original.id)} className="bg-red-500 text-white px-3 py-1.5 rounded text-sm">
+                    <button type="button" onClick={() => setConfirmId(row.original.id)} className="bg-red-500 text-white px-3 py-1.5 rounded text-sm">
                         <i className="fa-solid fa-delete-left"></i>
                     </button>
                 </div>
@@ -123,7 +123,7 @@ export default function TodoTable() {
     const [confirmId, setConfirmId] = useState<number | null>(null)
 
     return (
-        <div className="p-4 sm:p-6 bg-white border border-gray-200 rounded-2xl shadow-sm">
+        <div className="p-4 sm:p-6 bg-white border border-gray-200 rounded-2xl shadow-sm mb-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                 <h2 className="text-lg font-semibold">Todo List</h2>
                 <input
@@ -160,7 +160,7 @@ export default function TodoTable() {
                     </thead>
                     <tbody>
                         {loading ? (
-                            Array.from({ length: 5 }).map((_, i) => (
+                            Array.from({ length: 10 }).map((_, i) => (
                                 <tr key={i} className="border-b animate-pulse">
                                     {columns.map((_, j) => (
                                         <td key={j} className="p-3">
@@ -205,6 +205,7 @@ export default function TodoTable() {
                 </span>
                 <div className="flex gap-1">
                     <button
+                        type="button"
                         onClick={() => setPage(1)}
                         disabled={page === 1}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -212,6 +213,7 @@ export default function TodoTable() {
                         «
                     </button>
                     <button
+                        type="button"
                         onClick={() => setPage(Math.max(1, page - 1))}
                         disabled={page === 1}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -219,6 +221,7 @@ export default function TodoTable() {
                         ‹
                     </button>
                     <button
+                        type="button"
                         onClick={() => setPage(Math.min(totalPages, page + 1))}
                         disabled={page >= totalPages}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -226,6 +229,7 @@ export default function TodoTable() {
                         ›
                     </button>
                     <button
+                        type="button"
                         onClick={() => setPage(totalPages)}
                         disabled={page >= totalPages}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -241,8 +245,8 @@ export default function TodoTable() {
                         <div className="bg-white p-6 rounded-lg text-center">
                             <p className="text-lg font-bold mb-4">Are you sure you want to delete this item?</p>
                             <div className="flex gap-2 justify-center">
-                                <button onClick={() => { deleteTodo(confirmId); setConfirmId(null) }} className="bg-red-500 text-white px-4 py-2 rounded-md">Confirm</button>
-                                <button onClick={() => setConfirmId(null)} className="bg-gray-500 text-white px-4 py-2 rounded-md">Cancel</button>
+                                <button type="button" onClick={() => { deleteTodo(confirmId); setConfirmId(null) }} className="bg-red-500 text-white px-4 py-2 rounded-md">Confirm</button>
+                                <button type="button" onClick={() => setConfirmId(null)} className="bg-gray-500 text-white px-4 py-2 rounded-md">Cancel</button>
                             </div>
                         </div>
                     </div>

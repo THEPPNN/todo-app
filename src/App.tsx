@@ -2,6 +2,7 @@ import { TodoProvider } from './context/Todo'
 import TodoForm from './components/TodoForm'
 import TodoCalendar from './components/TodoCalendar'
 import TodoTable from './components/TodoTable'
+import TodoMonthly from './components/TodoMonthly'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           </div >
           <div className="md:col-span-2">
             <TodoTable />  
+            <TodoMonthly />
           </div >
         </div >
       </TodoProvider>

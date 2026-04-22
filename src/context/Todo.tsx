@@ -19,6 +19,8 @@ interface TodoContextType {
     setSearch: (s: string) => void
     toggleTodoStatus: (id: number, status: string) => void
     showToast: (message: string, color: string) => void
+    upcomingTodos: Todo[]
+    addUpcomingTodo: (details: { title: string, note: string, createdAt: string }) => void
 }
 
 const TodoContext = createContext<TodoContextType>(null)
@@ -112,6 +114,17 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    const addUpcomingTodo = (details: { title: string, note: string, createdAt: string }) => {
+        const newTodo: Todo = {
+            id: Date.now(),
+            ...details,
+            status: "pending" as const,
+            completed: false,
+        }
+        setUpcomingTodos(prev => [...prev, newTodo])
+        showToast("Todo added successfully", "green")
+    }
+
     const getUpcomingTodos = async () => {
         setLoading(true)
         try {
@@ -120,7 +133,7 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
                 title: item.title,
                 note: item.note,
                 createdAt: item.createdAt.split("T")[0],
-                status: item.status,
+                status: "pending" as const,
                 completed: false,
             }))
             setUpcomingTodos(data)
@@ -148,6 +161,7 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
             updatingTodo,
             setUpdatingTodo,
             upcomingTodos,
+            addUpcomingTodo,
             toggleTodoStatus,
             showToast
         }}>
