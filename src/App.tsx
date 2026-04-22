@@ -1,14 +1,26 @@
 import { TodoProvider } from './context/Todo'
 import TodoForm from './components/TodoForm'
-import './index.css'
 
 function App() {
   return (
     <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold text-blue-500">
+        To Do List
+      </h1>
       <TodoProvider>
-        <TodoForm />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-1">
+            <TodoForm />
+          </div >
+          <div className="md:col-span-1">
+            <p>รายการใกล้กำหนด 7 วันข้างหน้า</p>
+          </div >
+          <div className="md:col-span-2">
+            <p>รายการทั้งหมด</p>
+          </div >
+        </div >
       </TodoProvider>
-    </div>
+    </div >
   )
 }
 
