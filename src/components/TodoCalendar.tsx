@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useTodo } from "../context/Todo"
 
 export default function TodoCalendar() {
-    const { todos } = useTodo()
+    const { upcomingTodos } = useTodo()
     const [selectedDay, setSelectedDay] = useState<Date>(new Date())
     const formatLocalDate = (day: Date) => {
         const y = day.getFullYear()
@@ -21,7 +21,7 @@ export default function TodoCalendar() {
     }
 
     const getTodosByDay = (day: Date) =>
-        todos.filter(t => t.createdAt === formatLocalDate(day) && t.status !== "done")
+        upcomingTodos.filter(t => t.createdAt === formatLocalDate(day) && t.status !== "done")
 
     const isToday = (day: Date) => day.toDateString() === new Date().toDateString()
     const isSelected = (day: Date) => day.toDateString() === selectedDay.toDateString()

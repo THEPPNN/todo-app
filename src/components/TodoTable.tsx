@@ -7,18 +7,26 @@ import {
     type ColumnDef,
     type SortingState,
 } from "@tanstack/react-table"
-import { useTodos } from "../hook/useTodos"
 import type { Todo } from "../types/todo"
 import { useTodo } from "../context/Todo"
 
 export default function TodoTable() {
-    const [page, setPage] = useState(1)
-    const [limit] = useState(10)
+    const limit = 10
     const [sorting, setSorting] = useState<SortingState>([])
-    const [search, setSearch] = useState("")
 
-    const { data, isLoading, error, isPlaceholderData } = useTodos(page, limit, search)
-    const { deleteTodo, setUpdatingTodo } = useTodo()
+    const {
+        todos,
+        loading,
+        page,
+        setPage,
+        totalPages,
+        total,
+        search,
+        setSearch,
+        deleteTodo,
+        setUpdatingTodo,
+        toggleTodoStatus,
+    } = useTodo()
     const formatDateForInput = (dateStr: string) => {
         const date = new Date(dateStr)
 
@@ -66,7 +74,7 @@ export default function TodoTable() {
         {
             accessorKey: "status",
             header: "STATUS",
-            cell: ({ getValue }) => {
+            cell: ({ getValue, row }) => {
                 const status = getValue() as Todo["status"]
                 const styles = {
                     pending: "bg-yellow-100 text-yellow-700",
@@ -74,7 +82,9 @@ export default function TodoTable() {
                     done: "bg-green-100 text-green-700",
                 }
                 return (
-                    <select className={`text-xs px-2 py-1 rounded-full font-medium ${styles[status]}`}>
+                    <select
+                        value={status} onChange={(e) => toggleTodoStatus(row.original.id, e.target.value)}
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${styles[status]}`}>
                         <option value="pending">Pending</option>
                         <option value="in-progress">In Progress</option>
                         <option value="done">Done</option>
@@ -100,7 +110,7 @@ export default function TodoTable() {
     ]
 
     const table = useReactTable({
-        data: data?.todos ?? [],
+        data: todos,
         columns,
         state: { sorting },
         onSortingChange: setSorting,
@@ -109,7 +119,6 @@ export default function TodoTable() {
         manualPagination: true, // pagination จัดการเองผ่าน TanStack Query
     })
 
-    const totalPages = Math.ceil((data?.total ?? 0) / limit)
     const [confirmId, setConfirmId] = useState<number | null>(null)
 
     return (
@@ -149,7 +158,7 @@ export default function TodoTable() {
                         ))}
                     </thead>
                     <tbody>
-                        {isLoading ? (
+                        {loading ? (
                             Array.from({ length: 5 }).map((_, i) => (
                                 <tr key={i} className="border-b animate-pulse">
                                     {columns.map((_, j) => (
@@ -159,12 +168,6 @@ export default function TodoTable() {
                                     ))}
                                 </tr>
                             ))
-                        ) : error ? (
-                            <tr>
-                                <td colSpan={columns.length} className="p-8 text-center text-red-500">
-                                    เกิดข้อผิดพลาด: {(error as Error).message}
-                                </td>
-                            </tr>
                         ) : table.getRowModel().rows.length === 0 ? (
                             <tr>
                                 <td colSpan={columns.length} className="p-8 text-center text-gray-500">
@@ -188,7 +191,7 @@ export default function TodoTable() {
                     </tbody>
                 </table>
 
-                {isPlaceholderData && (
+                {loading && todos.length > 0 && (
                     <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
                         <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                     </div>
@@ -197,7 +200,7 @@ export default function TodoTable() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4">
                 <span className="text-sm text-gray-600">
-                    หน้า {page} / {totalPages} (ทั้งหมด {data?.total ?? 0} รายการ)
+                    หน้า {page} / {totalPages} (ทั้งหมด {total} รายการ)
                 </span>
                 <div className="flex gap-1">
                     <button
@@ -208,14 +211,14 @@ export default function TodoTable() {
                         «
                     </button>
                     <button
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        onClick={() => setPage(Math.max(1, page - 1))}
                         disabled={page === 1}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         ‹
                     </button>
                     <button
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
                         disabled={page >= totalPages}
                         className="px-3 py-1.5 text-sm rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -237,8 +240,8 @@ export default function TodoTable() {
                         <div className="bg-white p-6 rounded-lg text-center">
                             <p className="text-lg font-bold mb-4">Are you sure you want to delete this item?</p>
                             <div className="flex gap-2 justify-center">
-                                <button onClick={() => { deleteTodo(confirmId); setConfirmId(null) }} className="bg-red-500 text-white px-4 py-2 rounded-md">ยืนยัน</button>
-                                <button onClick={() => setConfirmId(null)} className="bg-gray-500 text-white px-4 py-2 rounded-md">ยกเลิก</button>
+                                <button onClick={() => { deleteTodo(confirmId); setConfirmId(null) }} className="bg-red-500 text-white px-4 py-2 rounded-md">Confirm</button>
+                                <button onClick={() => setConfirmId(null)} className="bg-gray-500 text-white px-4 py-2 rounded-md">Cancel</button>
                             </div>
                         </div>
                     </div>
