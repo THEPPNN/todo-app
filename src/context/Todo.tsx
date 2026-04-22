@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import type { Todo } from "../types/todo"
 import { mockTodos } from "../assets/mock/todos.mock"
+import ToastMessage from "../components/Toast.tsx";
 
 interface TodoContextType {
     todos: Todo[]
@@ -27,17 +28,25 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(false)
     const [updatingTodo, setUpdatingTodo] = useState<Todo[]>()
 
+    const [toast, setToast] = useState<{ message: string, color: string } | null>(null)
+    const showToast = (message: string, color: string) => {
+        setToast({ message: message, color: color })
+        setTimeout(() => setToast(null), 3000)
+    }
+
     const addTodo = (todo: Todo) => {
-        console.log('addTodo',todo);
+        console.log('addTodo', todo);
+        showToast("Todo added successfully", "green")
         setTodos([...todos, todo])
     }
-    const updateTodo = (id: number, todo: Todo) => {
-     console.log('updateTodo',id, todo);
-     setTodos(todos.map(t => t.id === id ? todo : t))
+    const updateTodo = (id: number, details: { title?: string, note?: string, createdAt?: string }) => {
+        showToast("Todo updated successfully", "green")
+        setTodos(todos.map(todo => todo.id === id ? { ...todo, ...details } : todo))
     }
     const deleteTodo = (id: number) => {
-     console.log('deleteTodo',id);
-        setTodos(todos.filter(t => t.id !== id))
+        console.log('deleteTodo', id);
+        showToast("Todo deleted successfully", "red")
+        setTodos(todos.filter(todo => todo.id !== id))
     }
 
     const getUpcomingTodos = async () => {
@@ -71,6 +80,7 @@ export const TodoProvider = ({ children }: { children: React.ReactNode }) => {
             setUpdatingTodo,
         }}>
             {children}
+            {toast && <ToastMessage message={toast.message} color={toast.color} />}
         </TodoContext.Provider>
     )
 }
