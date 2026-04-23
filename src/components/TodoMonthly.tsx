@@ -51,6 +51,9 @@ export default function TodoMonthCalendar() {
     const goToday = () => setCurrent(new Date())
 
     const openCreateModal = (date: Date) => {
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        if (date < today) return
         setCreatingDay(date)
         setNewTitle("")
         setNewNote("")

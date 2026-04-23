@@ -53,7 +53,8 @@ export default function TodoForm() {
                 {/* กำหนดส่ง */}
                 <label htmlFor="date" className="block mb-1 text-sm font-medium text-heading">Due Date</label>
                 <input type="date" id="createdAt" className="bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand block w-full px-3 py-2.5 shadow-xs placeholder:text-body"
-                    value={createdAt} onChange={(e) => setCreatedAt(e.target.value)} />
+                    value={createdAt} onChange={(e) => setCreatedAt(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]} />
             </div>
             <div className="mb-2">
                 <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md" disabled={loading}>
