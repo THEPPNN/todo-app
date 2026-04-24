@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table"
 import type { Todo } from "../types/todo"
 import { useTodo } from "../context/Todo"
-import { useTimeLog, formatDuration, formatTime } from "../hook/useTimeLog"
+import { useTimeLog } from "../hook/useTimeLog"
 
 export default function TodoTable() {
     const limit = 10
@@ -28,7 +28,7 @@ export default function TodoTable() {
         setUpdatingTodo,
         toggleTodoStatus,
     } = useTodo()
-    const { logStatusChange, clearTimeLog, getTimeLog } = useTimeLog()
+    const { logStatusChange, clearTimeLog } = useTimeLog()
 
     const handleStatusChange = (id: number, newStatus: string, title: string) => {
         logStatusChange(id, newStatus, title)
@@ -83,7 +83,6 @@ export default function TodoTable() {
             header: "STATUS",
             cell: ({ getValue, row }) => {
                 const status = getValue() as Todo["status"]
-                const log = getTimeLog(row.original.id)
                 const styles = {
                     pending: "bg-yellow-100 text-yellow-700",
                     "in-progress": "bg-blue-100 text-blue-700",
@@ -99,19 +98,6 @@ export default function TodoTable() {
                             <option value="in-progress">In Progress</option>
                             <option value="done">Done</option>
                         </select>
-                        {status === "done" && log.startedAt && log.completedAt && (
-                            <span className="text-[10px] text-green-600">
-                                ✅ {formatDuration(log.startedAt, log.completedAt)}
-                                <span className="text-gray-400 ml-1">
-                                    ({formatTime(log.startedAt)} → {formatTime(log.completedAt)})
-                                </span>
-                            </span>
-                        )}
-                        {status === "done" && !log.startedAt && log.completedAt && (
-                            <span className="text-[10px] text-gray-400">
-                                ⚡ Done {formatTime(log.completedAt)}
-                            </span>
-                        )}
                     </div>
                 )
             },
